@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ONCafe - Hệ Thống Quản Lý Quán Cà Phê</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>ONCafe <span class="badge-tag">Management</span></h1>
+          <p class="brand-slogan">Hệ thống Quản trị Thực đơn & Đơn hàng Nội bộ</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="api-status-pill" id="apiStatusPill" title="Trạng thái kết nối API">
+          <span class="status-dot"></span>
+          <span class="status-label" id="apiStatusText">Đang kiểm tra API...</span>
+        </div>
+        <div class="live-clock" id="liveClock">--:--:--</div>
+        <button class="btn btn-outline btn-sm" id="btnOpenApiConfig" title="Cấu hình MockAPI">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>API Config</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-main">
+    <div class="container">
+
+      <!-- Alert Banner (Dynamic) -->
+      <div id="alertBanner" class="alert-banner d-none" role="alert">
+        <div class="alert-icon" id="alertIcon">⚠️</div>
+        <div class="alert-content">
+          <strong id="alertTitle">Thông báo</strong>
+          <span id="alertMessage">Nội dung thông báo</span>
+        </div>
+        <button class="alert-close" id="btnCloseAlert" aria-label="Đóng">&times;</button>
+      </div>
+
+      <!-- KPI Dashboard Cards -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon bg-amber">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-title">Tổng món đồ uống</span>
+            <h3 class="stat-value" id="statTotalDrinks">0</h3>
+            <span class="stat-hint text-success" id="statDrinkHint">Menu phong phú</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon bg-emerald">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-title">Số danh mục</span>
+            <h3 class="stat-value" id="statTotalCategories">0</h3>
+            <span class="stat-hint" id="statCategoryHint">Phân loại rõ ràng</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon bg-indigo">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-title">Giá trung bình</span>
+            <h3 class="stat-value" id="statAvgPrice">0 đ</h3>
+            <span class="stat-hint" id="statPriceHint">Giá niêm yết</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon bg-rose">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-title">Đơn hàng hôm nay</span>
+            <h3 class="stat-value" id="statTotalOrders">0</h3>
+            <span class="stat-hint text-warning" id="statPendingOrders">0 đơn đang chờ</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs-wrapper">
+        <div class="nav-tabs">
+          <button class="tab-btn active" data-tab="tab-drinks" id="tabBtnDrinks">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            </svg>
+            <span>Quản Lý Món Đồ Uống</span>
+            <span class="tab-count-badge" id="tabDrinkCount">0</span>
+          </button>
+
+          <button class="tab-btn" data-tab="tab-orders" id="tabBtnOrders">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Quản Lý Đơn Hàng</span>
+            <span class="tab-count-badge" id="tabOrderCount">0</span>
+          </button>
+
+          <button class="tab-btn" data-tab="tab-settings" id="tabBtnSettings">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+            <span>Cấu Hình API & Dữ Liệu</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- TAB 1: QUẢN LÝ MÓN ĐỒ UỐNG (MAIN CRUD FOCUS) -->
+      <section class="tab-content active" id="tab-drinks">
+        <!-- Control Toolbar -->
+        <div class="toolbar-card">
+          <div class="toolbar-left">
+            <!-- Search Input -->
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên món đồ uống..." autocomplete="off">
+              <button class="clear-btn d-none" id="btnClearSearch" aria-label="Xóa tìm kiếm">&times;</button>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-box">
+              <select id="categoryFilter" aria-label="Lọc theo danh mục">
+                <option value="all">Tất cả danh mục</option>
+                <option value="Cà phê truyền thống">Cà phê truyền thống</option>
+                <option value="Cà phê máy & Espresso">Cà phê máy & Espresso</option>
+                <option value="Trà & Trái cây">Trà & Trái cây</option>
+                <option value="Đá xay & Freeze">Đá xay & Freeze</option>
+                <option value="Bánh ngọt & Ăn kèm">Bánh ngọt & Ăn kèm</option>
+              </select>
+            </div>
+
+            <!-- Sort Option -->
+            <div class="filter-box">
+              <select id="sortBy" aria-label="Sắp xếp danh sách">
+                <option value="newest">Mới nhất trước</option>
+                <option value="price-asc">Giá tăng dần</option>
+                <option value="price-desc">Giá giảm dần</option>
+                <option value="name-asc">Tên (A → Z)</option>
+                <option value="name-desc">Tên (Z → A)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toolbar-right">
+            <!-- View Mode Toggle -->
+            <div class="view-switch-group">
+              <button class="view-btn active" id="btnViewTable" title="Chế độ xem Bảng" aria-label="Chế độ xem bảng">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"></path>
+                </svg>
+              </button>
+              <button class="view-btn" id="btnViewGrid" title="Chế độ xem Thẻ / Lưới" aria-label="Chế độ xem thẻ">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Reload API Button -->
+            <button class="btn btn-secondary" id="btnReloadDrinks" title="Tải lại từ API">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" id="iconReload">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              <span class="btn-text">Làm mới</span>
+            </button>
+
+            <!-- Add New Drink Button -->
+            <button class="btn btn-primary" id="btnOpenAddModal">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Thêm Món Mới</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feedback & Response Handling States -->
+
+        <!-- 1. Loading State (Required by Rubric) -->
+        <div id="loadingState" class="state-container d-none">
+          <div class="loader-spinner"></div>
+          <h4 class="state-title">Đang đồng bộ dữ liệu từ API...</h4>
+          <p class="state-desc">Vui lòng chờ trong giây lát (GET /drinks)</p>
+          <div class="skeleton-table">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+
+        <!-- 2. Error State (Required by Rubric: Exception Handling) -->
+        <div id="errorState" class="state-container state-error d-none">
+          <div class="error-illustration">
+            <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="#DC2626" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3 class="state-title text-danger">Không thể kết nối đến máy chủ API!</h3>
+          <p class="state-desc" id="errorMessageText">Đã xảy ra lỗi khi gửi yêu cầu đến API endpoint.</p>
+          <div class="error-details-box" id="errorDetailsBox">
+            <code>HTTP Error / Network Timeout: Exception caught in fetch()</code>
+          </div>
+          <div class="error-action-btns">
+            <button class="btn btn-primary" id="btnRetryFetch">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+              </svg>
+              <span>Thử kết nối lại</span>
+            </button>
+            <button class="btn btn-outline" id="btnUseMockFallback">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              </svg>
+              <span>Chuyển sang chế độ Dữ liệu Nội bộ (Demo Mock)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Empty State -->
+        <div id="emptyState" class="state-container d-none">
+          <div class="empty-illustration">☕</div>
+          <h3 class="state-title">Chưa có món đồ uống nào phù hợp</h3>
+          <p class="state-desc">Hãy thử thay đổi từ khóa tìm kiếm, bộ lọc hoặc thêm món đồ uống mới vào thực đơn.</p>
+          <button class="btn btn-primary" id="btnEmptyAdd">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Thêm Món Đầu Tiên</span>
+          </button>
+        </div>
+
+        <!-- 4. Main Data Presentation: Table View -->
+        <div id="drinksTableContainer" class="table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="drinksTable">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">STT</th>
+                  <th style="width: 80px;">Hình ảnh</th>
+                  <th>Tên đồ uống</th>
+                  <th>Danh mục</th>
+                  <th style="text-align: right;">Đơn giá</th>
+                  <th style="text-align: center;">Trạng thái</th>
+                  <th style="width: 150px; text-align: center;">Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="drinksTableBody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="tableSummaryText">Hiển thị 0 / 0 món</span>
+            <div class="table-footer-actions">
+              <span class="hint-text">Cập nhật tự động qua REST API</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Main Data Presentation: Grid View -->
+        <div id="drinksGridContainer" class="cards-grid d-none">
+          <!-- Injected via JavaScript -->
+        </div>
+      </section>
+
+      <!-- TAB 2: QUẢN LÝ ĐẶT HÀNG & TRẠNG THÁI (ĐỀ BÀI YÊU CẦU) -->
+      <section class="tab-content" id="tab-orders">
+        <div class="orders-layout">
+          <!-- Quick Order Form -->
+          <div class="order-form-panel">
+            <div class="panel-header">
+              <h3>Tạo Đơn Hàng Mới</h3>
+              <p>Phục vụ tại bàn hoặc mang đi</p>
+            </div>
+            <form id="createOrderForm">
+              <div class="form-group">
+                <label for="orderTableNumber">Chọn Bàn / Khách:</label>
+                <select id="orderTableNumber" required>
+                  <option value="Bàn 01">Bàn 01 (Tầng 1)</option>
+                  <option value="Bàn 02">Bàn 02 (Tầng 1)</option>
+                  <option value="Bàn 03">Bàn 03 (Tầng 1)</option>
+                  <option value="Bàn 04">Bàn 04 (Tầng 2 - Ngoài trời)</option>
+                  <option value="Bàn 05">Bàn 05 (Tầng 2)</option>
+                  <option value="Mang đi (Take Away)">Mang đi (Take Away)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="orderDrinkSelect">Chọn Món Đồ Uống:</label>
+                <select id="orderDrinkSelect" required>
+                  <!-- Dynamically populated from drinks list -->
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-6">
+                  <label for="orderQuantity">Số lượng:</label>
+                  <input type="number" id="orderQuantity" value="1" min="1" max="50" required>
+                </div>
+                <div class="form-group col-6">
+                  <label for="orderNote">Ghi chú (đường, đá):</label>
+                  <input type="text" id="orderNote" placeholder="Ví dụ: Ít ngọt, nhiều đá">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Xác Nhận Đặt Món</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Orders Tracking List -->
+          <div class="orders-list-panel">
+            <div class="panel-header flex-between">
+              <div>
+                <h3>Danh Sách Đơn Hàng Đang Phục Vụ</h3>
+                <p>Theo dõi tiến độ pha chế và thanh toán theo thời gian thực</p>
+              </div>
+              <button class="btn btn-outline btn-sm" id="btnResetOrders">Đặt lại đơn mẫu</button>
+            </div>
+
+            <div class="orders-table-wrapper">
+              <table class="data-table" id="ordersTable">
+                <thead>
+                  <tr>
+                    <th>Mã đơn</th>
+                    <th>Vị trí</th>
+                    <th>Chi tiết món</th>
+                    <th style="text-align: right;">Tổng tiền</th>
+                    <th style="text-align: center;">Trạng thái</th>
+                    <th style="text-align: center;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: CẤU HÌNH API & HƯỚNG DẪN MOCKAPI -->
+      <section class="tab-content" id="tab-settings">
+        <div class="settings-card">
+          <div class="settings-header">
+            <div class="settings-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#D97706" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3>Cấu Hình Đường Dẫn API (MockAPI Endpoint)</h3>
+              <p>Hệ thống hỗ trợ kết nối trực tiếp với <strong>mockapi.io</strong> của bạn hoặc chuyển đổi chế độ Mock Data nội bộ bất kỳ lúc nào.</p>
+            </div>
+          </div>
+
+          <div class="settings-body">
+            <div class="form-group">
+              <label for="apiUrlInput"><strong>Đường dẫn Endpoint API (Resource: drinks):</strong></label>
+              <div class="input-with-button">
+                <input type="url" id="apiUrlInput" placeholder="https://<id_cua_ban>.mockapi.io/drinks" class="form-control-lg">
+                <button class="btn btn-primary" id="btnSaveApiUrl">Lưu & Kết Nối</button>
+              </div>
+              <small class="hint-text">Ví dụ mẫu: <code>https://6750000000000000.mockapi.io/drinks</code></small>
+            </div>
+
+            <div class="api-action-buttons">
+              <button class="btn btn-outline" id="btnTestApiConnection">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>Kiểm tra kết nối API</span>
+              </button>
+
+              <button class="btn btn-secondary" id="btnResetDefaultApi">
+                <span>Dùng API Demo Mặc Định</span>
+              </button>
+
+              <button class="btn btn-secondary" id="btnResetToMockData">
+                <span>Khôi phục dữ liệu mẫu ONCafe</span>
+              </button>
+            </div>
+
+            <hr class="divider">
+
+            <div class="mockapi-guide">
+              <h4>📋 Hướng dẫn tạo Resource trên MockAPI.io theo đề bài:</h4>
+              <ol class="guide-steps">
+                <li>Truy cập <strong>mockapi.io</strong> và đăng nhập bằng tài khoản cá nhân.</li>
+                <li>Nhấn nút <strong>"New Project"</strong> &rarr; Đặt tên là <code>CafeManagement</code> &rarr; Nhấn <em>Create</em>.</li>
+                <li>Nhấn <strong>"New Resource"</strong> &rarr; Đặt tên Resource là <code>drinks</code>.</li>
+                <li>Tại phần Schema, khai báo các trường:
+                  <ul>
+                    <li><code>id</code>: Object ID (hệ thống tự tạo)</li>
+                    <li><code>createdAt</code>: Faker.date (hệ thống tự tạo)</li>
+                    <li><code>name</code>: Kiểu <strong>String</strong> (Tên món đồ uống)</li>
+                    <li><code>price</code>: Kiểu <strong>Number</strong> (Giá bán tính bằng VNĐ)</li>
+                    <li><code>category</code>: Kiểu <strong>String</strong> (Danh mục đồ uống)</li>
+                    <li><code>image</code>: Kiểu <strong>String</strong> (Đường dẫn ảnh món)</li>
+                    <li><code>status</code>: Kiểu <strong>Boolean</strong> (Đang bán / Tạm hết)</li>
+                  </ul>
+                </li>
+                <li>Nhấn <em>Create</em> &rarr; Sao chép đường link endpoint dạng <code>https://...mockapi.io/drinks</code> và dán vào ô trên.</li>
+                <li>Tạo thêm Resource <code>orders</code> với các trường: <code>table</code>, <code>drinkId</code>, <code>drinkName</code>, <code>note</code>, <code>status</code> (String) và <code>unitPrice</code>, <code>quantity</code>, <code>total</code> (Number) để đồng bộ đơn hàng.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL: THÊM / CẬP NHẬT MÓN ĐỒ UỐNG (FORM CHỈNH SỬA) -->
+  <div class="modal-backdrop d-none" id="drinkModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon" id="modalActionIcon">☕</div>
+          <div>
+            <h3 class="modal-title" id="modalTitle">Thêm Món Đồ Uống Mới</h3>
+            <p class="modal-subtitle" id="modalSubtitle">Nhập thông tin sản phẩm để lưu vào cơ sở dữ liệu</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseDrinkModal" aria-label="Đóng">&times;</button>
+      </div>
+
+      <form id="drinkForm" novalidate>
+        <input type="hidden" id="drinkId" value="">
+
+        <div class="modal-body">
+          <!-- Drink Name -->
+          <div class="form-group">
+            <label for="drinkName">Tên món đồ uống <span class="required">*</span></label>
+            <input type="text" id="drinkName" class="form-control" placeholder="Ví dụ: Cà phê Muối Cốm Huế" required>
+            <div class="invalid-feedback" id="drinkNameFeedback">Vui lòng nhập tên món đồ uống (tối thiểu 3 ký tự).</div>
+          </div>
+
+          <!-- Category & Price in one row -->
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="drinkCategory">Danh mục <span class="required">*</span></label>
+              <select id="drinkCategory" class="form-control" required>
+                <option value="Cà phê truyền thống">Cà phê truyền thống</option>
+                <option value="Cà phê máy & Espresso">Cà phê máy & Espresso</option>
+                <option value="Trà & Trái cây">Trà & Trái cây</option>
+                <option value="Đá xay & Freeze">Đá xay & Freeze</option>
+                <option value="Bánh ngọt & Ăn kèm">Bánh ngọt & Ăn kèm</option>
+              </select>
+            </div>
+
+            <div class="form-group col-6">
+              <label for="drinkPrice">Đơn giá (VNĐ) <span class="required">*</span></label>
+              <input type="number" id="drinkPrice" class="form-control" placeholder="Ví dụ: 35000" min="1000" step="1000" required>
+              <div class="invalid-feedback" id="drinkPriceFeedback">Giá phải là số nguyên từ 1.000 đến 10.000.000 VNĐ.</div>
+            </div>
+          </div>
+
+          <!-- Image URL with preset picker -->
+          <div class="form-group">
+            <label for="drinkImage">Đường dẫn hình ảnh (URL)</label>
+            <input type="url" id="drinkImage" class="form-control" placeholder="https://images.unsplash.com/...">
+            <div class="invalid-feedback" id="drinkImageFeedback">Đường dẫn ảnh phải bắt đầu bằng http:// hoặc https://.</div>
+            <div class="image-preview-wrap">
+              <img id="drinkImagePreview" src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=200&q=80" alt="Preview" class="preview-img">
+              <div class="preview-text">
+                <span class="preview-label">Xem trước ảnh sản phẩm</span>
+                <div class="quick-preset-chips">
+                  <span class="chip" data-img="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=300&q=80">Cà phê Đen</span>
+                  <span class="chip" data-img="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=80">Cappuccino</span>
+                  <span class="chip" data-img="https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=300&q=80">Trà Đào</span>
+                  <span class="chip" data-img="https://images.unsplash.com/photo-1577805947697-89e18249d767?auto=format&fit=crop&w=300&q=80">Đá Xay</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status / In Stock Toggle -->
+          <div class="form-group checkbox-group">
+            <label class="custom-toggle">
+              <input type="checkbox" id="drinkStatus" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <label for="drinkStatus" class="toggle-label">Đang kinh doanh / Còn nguyên liệu phục vụ</label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelDrinkModal">Hủy bỏ</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitDrink">
+            <span class="btn-spinner d-none" id="modalSaveSpinner"></span>
+            <span id="btnSubmitDrinkText">Lưu Món Đồ Uống</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: XÁC NHẬN XÓA MÓN (DELETE CONFIRMATION) -->
+  <div class="modal-backdrop d-none" id="deleteConfirmModal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header modal-header-danger">
+        <div class="modal-title-wrap">
+          <div class="modal-icon danger-icon">🗑️</div>
+          <div>
+            <h3 class="modal-title">Xác Nhận Xóa Món</h3>
+            <p class="modal-subtitle">Hành động này sẽ gửi lệnh HTTP DELETE đến API</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseDeleteModal">&times;</button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Bạn có chắc chắn muốn xóa món <strong id="deleteDrinkName" class="text-danger">--</strong> khỏi thực đơn?</p>
+        <p class="text-muted small">Dữ liệu trên máy chủ MockAPI sẽ bị gỡ bỏ vĩnh viễn.</p>
+      </div>
+      <div class="modal-footer modal-footer-center">
+        <button type="button" class="btn btn-secondary" id="btnCancelDelete">Giữ lại</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmDelete">
+          <span class="btn-spinner d-none" id="deleteSpinner"></span>
+          <span id="btnConfirmDeleteText">Đồng ý Xóa</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER (FEEDBACK / RESPONSE HANDLING) -->
+  <div class="toast-container" id="toastContainer" aria-live="polite">
+    <!-- Injected dynamically via showToast() -->
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <strong>ONCafe Management System v1.0</strong>
+        <span>Học phần: Công nghệ phần mềm (FIT4010-D) - Đại học Đại Nam</span>
+      </div>
+      <div class="footer-right">
+        <span>Triển khai tự động trên <strong>GitLab Pages</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
