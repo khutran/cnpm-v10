@@ -7,7 +7,7 @@
  * Giá trị này được dùng cho mọi người mở website, kể cả giảng viên chấm bài.
  * Ví dụ: 'https://abc123.mockapi.io/api/v1/drinks'
  * ========================================================================== */
-const DEFAULT_API_URL = '';
+const DEFAULT_API_URL = 'https://6af1c1fb42c6561ced389554.mockapi.io/drinks';
 
 const REQUEST_TIMEOUT_MS = 10000;
 const LOCAL_DELAY_MS = 350;
